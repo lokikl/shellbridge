@@ -22,10 +22,10 @@ My env. is ubuntu 14.04, nodejs 0.10.25 and vim 7.4 p183.
 How to install
 ==============
 
-1. Checkout the codes
+1. Checkout the codes, symbolic link shellbridge.js to /usr/local/bin/shellbridge
 2. `npm install stdio node-json-minify`
 3. `cp shellbridgerc ~/.shellbridgerc`
-4. `./shellbridge --server` to start the daemon
+4. `shellbridge --server` to start the daemon
 5. Start vim with servername eg. `vim --servername shell`
 6. Source editors/shellbridge.vim
 7. `Alt-n` to get started
