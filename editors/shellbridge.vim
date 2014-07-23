@@ -1,8 +1,4 @@
-" shellbridge
-" in order to make some interactive cmd works, please feed some parameters
-"   ssh:           ssh -tt
-"   mysql:         mysql -n
-"   redis-cli:     (fine with default)
+" vim plugin to integrate shellbridge
 " ----------------------------------------------------------------------
 
 function! shellbridge#get_list_line(line)
@@ -121,7 +117,8 @@ function! shellbridge#on_message(id, msg)
   if cmdLine > 0 " when last line exist
     let lastLine = shellbridge#get_list_line(cmdLine)
     let output = substitute(a:msg, "&#39;", "'", "g")
-    let output = substitute(output, "", "", "g")
+    let output = substitute(output, "
+", "", "g")
     let spad = indent(cmdLine) == 2 ? "    " : "  "
     let output = spad . substitute(output, "\n", "\n".spad, "g")
     exec "silent " . lastLine . "put =output"
