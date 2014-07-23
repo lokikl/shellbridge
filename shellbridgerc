@@ -1,0 +1,12 @@
+{
+  "insertCmd": "shellbridge#on_message(%s, \"%o\")",
+  "editorCmd": "vim --servername %s --remote-expr '%c'",
+  "logEditorCmd": false,
+  "commands": {
+    "^mysql": { "replace": "mysql -n" },
+    "^irb": { "replace": "irb -f --noprompt" }
+  }
+}
+
+// to use ssh
+// try `ssh <server> "bash"`
