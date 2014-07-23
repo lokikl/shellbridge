@@ -11,6 +11,14 @@ Demo on vim
 ![alt tag](https://raw.githubusercontent.com/lokikl/shellbridge/master/vim-demo.gif)
 
 
+Prerequisite
+============
+
+vim 7.3+ and nodejs are required.
+
+My Env. is ubuntu 14.04, nodejs 0.10.25 and vim 7.4 p183.
+
+
 How to install
 ==============
 
