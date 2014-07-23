@@ -26,11 +26,10 @@ How to install
 2. `npm install stdio node-json-minify`
 3. `cp shellbridgerc ~/.shellbridgerc`
 4. `shellbridge --server` to start the daemon
-5. Start vim with servername eg. `vim --servername shell`
-6. Source editors/shellbridge.vim
-7. `Alt-n` to get started
-8. Type in `echo 123` then `Ctrl-Enter` to execute the line
-9. Inspect shellbridge.vim for more movement
+5. Start vim with any servername eg. `vim --servername shell`
+6. Source editors/shellbridge.vim, then `Alt-n` to get started
+7. Type in `echo 123` then `Ctrl-Enter` to execute the line
+8. Inspect shellbridge.vim for more movement
 
 
 Getting Involved
