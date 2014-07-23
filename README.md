@@ -16,11 +16,12 @@ How to install
 
 1. Checkout the codes
 2. `npm install stdio node-json-minify`
-3. `./shellbridge --server` to start the daemon
-4. Open vim and source editors/shellbridge.vim
-5. `Alt-n` to get started
-6. Type in `echo 123` then `Ctrl-Enter` to execute the line
-7. Inspect shellbridge.vim for more movement
+3. `cp shellbridgerc ~/.shellbridgerc`
+4. `./shellbridge --server` to start the daemon
+5. Open vim and source editors/shellbridge.vim
+6. `Alt-n` to get started
+7. Type in `echo 123` then `Ctrl-Enter` to execute the line
+8. Inspect shellbridge.vim for more movement
 
 
 Getting Involved
