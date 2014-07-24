@@ -26,7 +26,7 @@ How to install
 
 1. `sudo npm install -g shellbridge`
 2. `shellbridge --server` to start the daemon
-3. Edit vimrc to source \`npm root -g\`/shellbridge/editors/shellbridge.vim
+3. echo source `npm root -g`/shellbridge/editors/shellbridge.vim > ~/.vimrc
 4. Start vim with any servername eg. `vim --servername shell`
 5. `Alt-n` to initialize the shellbridge interface
 6. Insert `echo 123` then `Ctrl-Enter` to execute the line
