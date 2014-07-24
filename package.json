@@ -1,0 +1,33 @@
+{
+  "name": "shellbridge",
+  "description": "Enabling interactive shell inside editors like vim",
+  "version": "0.1.0",
+  "author": {
+    "name": "Loki Ng",
+    "email": "dev@lokikl.com",
+    "url": "http://lokikl.com",
+  },
+  "repository": {
+    "type": "git",
+    "url": "git@github.com:lokikl/shellbridge.git"
+  },
+  "main": "./lib/client",
+  "bugs": {
+    "url": "https://github.com/lokikl/shellbridge/issues",
+    "email": "dev@lokikl.com"
+  },
+  "bin": {
+    "shellbridge": "shellbridge.js"
+  },
+  "dependencies": {
+    "stdio": "",
+    "ps-tree": "",
+    "node-json-minify": ""
+  },
+  "readmeFilename": "README.md",
+  "engines": {
+    "node": "*"
+  },
+  "os": [ "!win32" ],
+  "preferGlobal": true
+}
