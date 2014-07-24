@@ -90,6 +90,10 @@ function! shellbridge#new_cmd()
 endfunction
 
 function! shellbridge#init()
+  if v:servername == ""
+    echo "Please start vim with --servername option"
+    return
+  endif
   setl nowrap conceallevel=2 concealcursor=incv
   setl noai nocin nosi inde= sts=0 sw=2 ts=2 ft=sh
   filetype indent off
