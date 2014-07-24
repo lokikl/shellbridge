@@ -16,7 +16,7 @@ Prerequisite
 
 vim 7.3+ and nodejs are required.
 
-You may get them by `apt-get install nodejs npm` on ubuntu.
+You may get them by `apt-get install nodejs npm vim` on ubuntu.
 
 My env. is ubuntu 14.04, nodejs 0.10.25 and vim 7.4 p183.
 
