@@ -23,7 +23,7 @@ How to install
 ==============
 
 1. Checkout the codes, symbolic link shellbridge.js to /usr/local/bin/shellbridge
-2. `npm install stdio node-json-minify`
+2. `npm install stdio node-json-minify ps-tree`
 3. `cp shellbridgerc ~/.shellbridgerc`
 4. `shellbridge --server` to start the daemon
 5. Start vim with any servername eg. `vim --servername shell`
