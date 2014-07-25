@@ -36,7 +36,8 @@ How to install
 Updates
 =======
 
-0.1.3
+#### 0.1.3
+
 Supported multiline execution and added output buffer
 
 ![alt tag](https://raw.githubusercontent.com/lokikl/shellbridge/master/multiline_output_buffer.gif)
