@@ -2,7 +2,7 @@
 " ----------------------------------------------------------------------
 
 " fix alt key in terminal vim
-if has("gui_running")
+if !has("gui_running")
   let c='a'
   while c <= 'z'
     exec "set <A-".c.">=\e".c
