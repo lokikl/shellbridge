@@ -1,6 +1,18 @@
 " vim plugin to integrate shellbridge
 " ----------------------------------------------------------------------
 
+" fix alt key in terminal vim
+if has("gui_running")
+  let c='a'
+  while c <= 'z'
+    exec "set <A-".c.">=\e".c
+    exec "imap \e".c." <A-".c.">"
+    let c = nr2char(1+char2nr(c))
+  endw
+  set ttimeout ttimeoutlen=50
+endif
+
+" get line number of the number to append output
 function! shellbridge#get_last_line(line)
   let last = line('$')
   let l = a:line
@@ -79,40 +91,28 @@ function! shellbridge#next_cmd()
   return search("^data:", "n")
 endfunction
 
-function! shellbridge#new_cmd()
-  if indent('.') == 0
-    let cmdline = line('.')
-  else
-    let cmdline = shellbridge#previous_cmd()
-  endif
-  exec shellbridge#get_last_line(cmdline)
-  normal o
-endfunction
-
 function! shellbridge#init()
   if v:servername == ""
-    echo "Please start vim with --servername option"
-    return
+    echoerr "Please start vim with --servername option" | return
   endif
+  tabnew
   setl nowrap conceallevel=2 concealcursor=incv
   setl noai nocin nosi inde= sts=0 sw=2 ts=2 ft=sh
   filetype indent off
   syntax match XXXConcealed /data:.*|/ conceal cchar=›
   " send cmd
-  nnoremap <silent> <c-cr> :call shellbridge#exec()<cr>
-  inoremap <silent> <c-cr> <esc>:call shellbridge#exec()<cr>
-  vnoremap <silent> <c-cr> <esc>:call shellbridge#exec_multiline()<cr>
+  nnoremap <buffer> <silent> <cr> :call shellbridge#exec()<cr>
+  inoremap <buffer> <silent> <cr> <esc>:call shellbridge#exec()<cr>
+  vnoremap <buffer> <silent> <cr> <esc>:call shellbridge#exec_multiline()<cr>
   " kill cmd/ clear output/ select output
-  nnoremap <silent> <m-d> :call shellbridge#kill()<cr>
-  nnoremap <silent> <m-c> :call shellbridge#cleanup_indented(line('.'))<cr>
-  nnoremap <silent> <m-v> :call shellbridge#select_output()<cr>
+  nnoremap <buffer> <silent> <m-d> :call shellbridge#kill()<cr>
+  nnoremap <buffer> <silent> <m-c> :call shellbridge#cleanup_indented(line('.'))<cr>
+  nnoremap <buffer> <silent> <m-v> :call shellbridge#select_output()<cr>
   " jump to prev/next cmd
-  nnoremap <silent> <m-j> :call search("data:", "")<cr>
-  nnoremap <silent> <m-k> :call search("data:", "b")<cr>
+  nnoremap <buffer> <silent> <m-j> :call search("data:", "")<cr>
+  nnoremap <buffer> <silent> <m-k> :call search("data:", "b")<cr>
   " sort output
-  nnoremap <silent> <m-u> :call shellbridge#select_output()<cr>:!sort<cr>
-  " new command
-  nnoremap <silent> <c-space> :call shellbridge#new_cmd()<cr>i
+  nnoremap <buffer> <silent> <m-u> :call shellbridge#select_output()<cr>:!sort<cr>
 endfunction
 
 " called by server.js
@@ -137,7 +137,7 @@ function! shellbridge#exec()
   let onlycmd = shellbridge#get_cmd(execline)
   let ind = indent(execline)
   if ind != 0 && ind != 2
-    echo "Indentation must be either 0 or 2" | return
+    echoerr "Indentation must be either 0 or 2" | return
   end
   call shellbridge#cleanup_indented(execline)
 
@@ -186,4 +186,4 @@ function! shellbridge#kill()
   call system("shellbridge -k '" . getline('.') . "'")
 endfunction
 
-nnoremap <m-n> :tabnew<cr>:call shellbridge#init()<cr>
+nnoremap <m-n> :call shellbridge#init()<cr>
