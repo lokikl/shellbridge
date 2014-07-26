@@ -29,7 +29,7 @@ How to install
 3. ``echo source `npm root -g`/shellbridge/editors/shellbridge.vim > ~/.vimrc``
 4. Start vim with any servername eg. `vim --servername shell`
 5. `Alt-n` to initialize the shellbridge interface
-6. Insert `echo 123` then `Ctrl-Enter` to execute the line
+6. Insert `echo 123` then `Enter` to execute the line
 7. Inspect shellbridge.vim for more movement
 
 
