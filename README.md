@@ -8,7 +8,7 @@ shellbridge is a daemon written in javascript, enabling an interactive shell exp
 Demo on vim
 ===========
 
-![alt tag](https://raw.githubusercontent.com/lokikl/shellbridge/master/vim-demo.gif)
+![alt tag](https://raw.githubusercontent.com/lokikl/shellbridge/master/demo/vim-demo.gif)
 
 
 Prerequisite
@@ -40,7 +40,7 @@ Updates
 
 Supported multiline execution and added output buffer
 
-![alt tag](https://raw.githubusercontent.com/lokikl/shellbridge/master/multiline_output_buffer.gif)
+![alt tag](https://raw.githubusercontent.com/lokikl/shellbridge/master/demo/multiline_output_buffer.gif)
 
 
 Getting Involved
