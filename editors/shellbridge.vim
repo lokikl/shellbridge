@@ -111,9 +111,8 @@ function! shellbridge#init()
     echoerr "Please start vim with --servername option" | return
   endif
   tabnew
-  setl nowrap conceallevel=2 concealcursor=incv
+  setl nowrap conceallevel=2 concealcursor=inv
   setl noai nocin nosi inde= sts=0 sw=2 ts=2 ft=sh
-  filetype indent off
   syntax match XXXConcealed /%.*|/ conceal cchar=›
 
   let mappings = [
