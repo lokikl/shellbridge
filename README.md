@@ -37,6 +37,13 @@ How to install
 Updates
 =======
 
+#### 0.1.7
+
+* vim key mappings are now configurable
+* optimized vim conceal
+* fixed the abnormal highlighting
+
+
 #### 0.1.3
 
 Supported multiline execution and added output buffer
