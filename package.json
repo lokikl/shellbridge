@@ -1,7 +1,7 @@
 {
   "name": "shellbridge",
   "description": "Enabling interactive shell inside editors like vim",
-  "version": "0.1.6",
+  "version": "0.1.7",
   "author": {
     "name": "Loki Ng",
     "email": "dev@lokikl.com",

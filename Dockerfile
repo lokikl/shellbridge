@@ -1,5 +1,10 @@
 # shellbridge on vim 7.3/ubuntu 14.04
 
+# caution:
+# This is currently not working as I still haven't figured out how to start vim in clientserver inside docker.
+# Cuz clientserver need xterm
+# It'd be great if any expert can help me on this, really hope it can be demo with docker
+
 # You may build a docker image yourself and run it in a container
 # sudo docker build -t myshellbridge .
 # sudo docker run -ti myshellbridge /bin/bash
