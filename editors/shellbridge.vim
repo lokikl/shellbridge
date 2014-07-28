@@ -12,6 +12,20 @@ if !has("gui_running")
   set ttimeout ttimeoutlen=50
 endif
 
+" default value of key mappings
+function! s:SetDefault(name, default)
+  if !exists(a:name)
+    exec "let " . a:name . " = '" . a:default . "'"
+  endif
+endfunction
+call s:SetDefault("g:shellbridge_exec", "<cr>")
+call s:SetDefault("g:shellbridge_kill", "<m-d>")
+call s:SetDefault("g:shellbridge_cleanup", "<m-c>")
+call s:SetDefault("g:shellbridge_select", "<m-v>")
+call s:SetDefault("g:shellbridge_next", "<m-j>")
+call s:SetDefault("g:shellbridge_previous", "<m-k>")
+call s:SetDefault("g:shellbridge_sort", "<m-u>")
+
 " get line number of the number to append output
 function! shellbridge#get_last_line(line)
   let last = line('$')
@@ -26,9 +40,9 @@ function! shellbridge#get_last_line(line)
 endfunction
 
 function! shellbridge#get_line_of_id(id)
-  let l = search("data:".a:id.",active|", "n")
+  let l = search("%".a:id."!|", "n")
   if l == 0
-    return search("data:current,active|", "n")
+    return search("%current!|", "n")
   else
     return l
   endif
@@ -36,13 +50,13 @@ endfunction
 
 function! shellbridge#get_cmd(line)
   let cmdLine = getline(a:line)
-  let onlycmd = substitute(cmdLine, " *data\:.*| ", "", "")
+  let onlycmd = substitute(cmdLine, " *%.*| ", "", "")
   return substitute(onlycmd, "^  ", "", "")
 endfunction
 
 function! shellbridge#get_id_from_line(line)
   let content = getline(a:line)
-  return split(matchstr(content, "data:\\d*"), ':')[1]
+  return split(matchstr(content, "%\\d*"), '%')[0]
 endfunction
 
 function! shellbridge#form_cmd(id, onlycmd)
@@ -74,22 +88,23 @@ endfunction
 
 function! shellbridge#cleanup_active_flags(line)
   let [curLineNo, prevLineEnd] = [line('.'), shellbridge#get_last_line(a:line)]
-  exec a:line . "," . prevLineEnd . "s/,active|/|/e"
+  exec a:line . "," . prevLineEnd . "s/!|/|/e"
   exec curLineNo
 endfunction
 
 function! shellbridge#update_meta(id, onlycmd, pad)
-  let outputLine = a:pad . "data:" . a:id . ",active| " . a:onlycmd
+  let outputLine = a:pad . "%" . a:id . "!| " . a:onlycmd
   s/.*/\=outputLine/
 endfunction
 
 function! shellbridge#previous_cmd()
-  return search("^data:", "bn")
+  return search("^%", "bn")
 endfunction
 
 function! shellbridge#next_cmd()
-  return search("^data:", "n")
+  return search("^%", "n")
 endfunction
+
 
 function! shellbridge#init()
   if v:servername == ""
@@ -99,20 +114,22 @@ function! shellbridge#init()
   setl nowrap conceallevel=2 concealcursor=incv
   setl noai nocin nosi inde= sts=0 sw=2 ts=2 ft=sh
   filetype indent off
-  syntax match XXXConcealed /data:.*|/ conceal cchar=›
-  " send cmd
-  nnoremap <buffer> <silent> <cr> :call shellbridge#exec()<cr>
-  inoremap <buffer> <silent> <cr> <esc>:call shellbridge#exec()<cr>
-  vnoremap <buffer> <silent> <cr> <esc>:call shellbridge#exec_multiline()<cr>
-  " kill cmd/ clear output/ select output
-  nnoremap <buffer> <silent> <m-d> :call shellbridge#kill()<cr>
-  nnoremap <buffer> <silent> <m-c> :call shellbridge#cleanup_indented(line('.'))<cr>
-  nnoremap <buffer> <silent> <m-v> :call shellbridge#select_output()<cr>
-  " jump to prev/next cmd
-  nnoremap <buffer> <silent> <m-j> :call search("data:", "")<cr>
-  nnoremap <buffer> <silent> <m-k> :call search("data:", "b")<cr>
-  " sort output
-  nnoremap <buffer> <silent> <m-u> :call shellbridge#select_output()<cr>:!sort<cr>
+  syntax match XXXConcealed /%.*|/ conceal cchar=›
+
+  let mappings = [
+    \["n", g:shellbridge_exec, ":call shellbridge#exec()<cr>"],
+    \["i", g:shellbridge_exec, "<esc>:call shellbridge#exec()<cr>"],
+    \["v", g:shellbridge_exec, "<esc>:call shellbridge#exec_multiline()<cr>"],
+    \["n", g:shellbridge_kill, ":call shellbridge#kill()<cr>"],
+    \["n", g:shellbridge_cleanup, ":call shellbridge#cleanup_indented(line('.'))<cr>"],
+    \["n", g:shellbridge_select, ":call shellbridge#select_output()<cr>"],
+    \["n", g:shellbridge_sort, ":call shellbridge#select_output()<cr>:!sort<cr>"],
+    \["n", g:shellbridge_next, ":call search('%', '')<cr>"],
+    \["n", g:shellbridge_previous, ":call search('%', 'b')<cr>"]
+  \]
+  for mapping in mappings
+    exec mapping[0] . "noremap <buffer> <silent> " . mapping[1] . ' ' . mapping[2]
+  endfor
 endfunction
 
 " called by server.js
@@ -127,6 +144,7 @@ function! shellbridge#on_message(id, msg)
     let output = spad . substitute(output, "\n", "\n".spad, "g")
     exec "silent " . lastLine . "put =output"
     exec "silent normal! " . oline . "G" . ocol . "|"
+    exec "nohlsearch"
     exec "redraw"
   endif
 endfunction
@@ -153,7 +171,6 @@ function! shellbridge#exec()
     call shellbridge#cleanup_active_flags(execline)
     call shellbridge#update_meta('current', onlycmd, '')
   endif
-
   let output = system(shellbridge#form_cmd(id, onlycmd))
 
   if ind == 0 " primary cmd
@@ -169,13 +186,13 @@ function! shellbridge#exec_multiline()
     if indent(nend) != ind
       exec nend | normal dd
     else
-      exec nend . 's/\</data:pending| /'
+      exec nend . 's/\</%pending| /'
     endif
     let nend -= 1
   endwhile
 
   while 1
-    let l = search("data:pending|")
+    let l = search("%pending|")
     if l == 0 | break | endif
     call shellbridge#exec()
     sleep 50ms
