@@ -38,6 +38,14 @@ How to install
 Updates
 =======
 
+#### 0.1.10
+
+* identified lines indended as subcmd, no need to be indented with exactly 2 spaces
+* updated default key mappings:
+  1. alt n to start/execute
+  2. alt s to sort
+* showed all key mappings when started
+
 #### 0.1.7
 
 * vim key mappings are now configurable
