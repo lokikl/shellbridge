@@ -15,13 +15,13 @@ Prerequisite
 ============
 
 * vim 7.3+ compiled with +client-server option
-* nodejs
+* newer nodejs
 
 You may get them by `apt-get install nodejs npm vim vim-gnome` on ubuntu.
 
 My env. is ubuntu 14.04, nodejs 0.10.25 and vim 7.4 p183.
 
-For Ubuntu 12.04, nodejs maybe outdated. Please install from PPA or the official website.
+For Ubuntu 12.04, please install newer node from PPA or the official website and npm from it's installer script.
 
 
 How to install
