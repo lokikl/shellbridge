@@ -1,7 +1,7 @@
 {
   "name": "shellbridge",
   "description": "Enabling interactive shell inside editors like vim",
-  "version": "0.1.7",
+  "version": "0.1.9",
   "author": {
     "name": "Loki Ng",
     "email": "dev@lokikl.com",
@@ -32,7 +32,7 @@
   },
   "readmeFilename": "README.md",
   "engines": {
-    "node": "*"
+    "node": ">=0.10.3"
   },
   "os": [ "!win32" ],
   "preferGlobal": true

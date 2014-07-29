@@ -21,13 +21,15 @@ You may get them by `apt-get install nodejs npm vim vim-gnome` on ubuntu.
 
 My env. is ubuntu 14.04, nodejs 0.10.25 and vim 7.4 p183.
 
+For Ubuntu 12.04, nodejs maybe outdated. Please install from PPA or the official website.
+
 
 How to install
 ==============
 
 1. `sudo npm install -g shellbridge`
 2. `shellbridge --server` to start the daemon
-3. ``echo source `npm root -g`/shellbridge/editors/shellbridge.vim > ~/.vimrc``
+3. ``echo source `npm root -g`/shellbridge/editors/shellbridge.vim >> ~/.vimrc``
 4. Start vim with any servername eg. `vim --servername anyword`
 5. `Alt-n` to initialize the shellbridge interface
 6. Insert `echo 123` then `Enter` to execute the line
