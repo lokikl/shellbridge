@@ -32,12 +32,19 @@ How to install
 3. ``echo source `npm root -g`/shellbridge/editors/shellbridge.vim >> ~/.vimrc``
 4. Start vim with any servername eg. `vim --servername anyword`
 5. `Alt-n` to initialize the shellbridge interface
-6. Insert `echo 123` then `Enter` to execute the line
-7. Inspect shellbridge.vim for more movement
+6. Insert `echo 123` then `Alt-n` to execute the line
 
 
 Updates
 =======
+
+#### 0.1.10
+
+* identified lines indended as subcmd, no need to be indented with exactly 2 spaces
+* updated default key mappings:
+  1. alt n to start/execute
+  2. alt s to sort
+* showed all key mappings when started
 
 #### 0.1.7
 
