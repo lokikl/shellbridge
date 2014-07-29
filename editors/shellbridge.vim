@@ -181,13 +181,13 @@ function! shellbridge#exec()
     call shellbridge#cleanup_active_flags(execline)
     call shellbridge#update_meta('current', onlycmd, '')
   endif
+  call shellbridge#cleanup_indented(execline)
   let output = system(shellbridge#form_cmd(id, onlycmd))
 
   if ind == 0 " primary cmd
     let id = substitute(output, "\n$", "", "")
     call shellbridge#update_meta(id, onlycmd, '')
   end
-  call shellbridge#cleanup_indented(execline)
 endfunction
 
 function! shellbridge#exec_multiline()
