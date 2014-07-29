@@ -18,13 +18,14 @@ function! s:SetDefault(name, default)
     exec "let " . a:name . " = '" . a:default . "'"
   endif
 endfunction
-call s:SetDefault("g:shellbridge_exec", "<cr>")
+call s:SetDefault("g:shellbridge_init", "<m-n>")
+call s:SetDefault("g:shellbridge_exec", "<m-n>")
 call s:SetDefault("g:shellbridge_kill", "<m-d>")
 call s:SetDefault("g:shellbridge_cleanup", "<m-c>")
 call s:SetDefault("g:shellbridge_select", "<m-v>")
 call s:SetDefault("g:shellbridge_next", "<m-j>")
 call s:SetDefault("g:shellbridge_previous", "<m-k>")
-call s:SetDefault("g:shellbridge_sort", "<m-u>")
+call s:SetDefault("g:shellbridge_sort", "<m-s>")
 
 " get line number of the number to append output
 function! shellbridge#get_last_line(line)
@@ -50,8 +51,10 @@ endfunction
 
 function! shellbridge#get_cmd(line)
   let cmdLine = getline(a:line)
+  " remove the meta tag if there is any
   let onlycmd = substitute(cmdLine, " *%.*| ", "", "")
-  return substitute(onlycmd, "^  ", "", "")
+  " remove any heading spaces
+  return substitute(onlycmd, "^ *", "", "")
 endfunction
 
 function! shellbridge#get_id_from_line(line)
@@ -129,6 +132,18 @@ function! shellbridge#init()
   for mapping in mappings
     exec mapping[0] . "noremap <buffer> <silent> " . mapping[1] . ' ' . mapping[2]
   endfor
+  " map alt-o to open filename with line number under cursor in a new tab
+  nmap <m-o> <c-w>gF
+  " print help message
+  let help = "# Welcome to shellbridge, below are your key mappings\n
+        \# " . g:shellbridge_exec . ": Execute commands\n
+        \# " . g:shellbridge_kill . ": Kill a running process\n
+        \# " . g:shellbridge_cleanup . ": Cleanup command output\n
+        \# " . g:shellbridge_sort . ": Sort command output\n
+        \# " . g:shellbridge_next . ": Jump to next command\n
+        \# " . g:shellbridge_previous . ": Jump to previous command\n
+        \\n\n"
+  0put =help
 endfunction
 
 " called by server.js
@@ -151,15 +166,11 @@ endfunction
 " called in vim key binding
 function! shellbridge#exec()
   let execline = line('.')
-  let onlycmd = shellbridge#get_cmd(execline)
   let ind = indent(execline)
-  if ind != 0 && ind != 2
-    echoerr "Indentation must be either 0 or 2" | return
-  end
-  call shellbridge#cleanup_indented(execline)
+  let onlycmd = shellbridge#get_cmd(execline)
 
   let id = -1
-  if ind == 2 " sub-cmd
+  if ind > 0 " sub-cmd
     let prevLine = shellbridge#previous_cmd()
     if prevLine > 0 && prevLine < execline
       call shellbridge#cleanup_active_flags(prevLine)
@@ -176,6 +187,7 @@ function! shellbridge#exec()
     let id = substitute(output, "\n$", "", "")
     call shellbridge#update_meta(id, onlycmd, '')
   end
+  call shellbridge#cleanup_indented(execline)
 endfunction
 
 function! shellbridge#exec_multiline()
@@ -202,4 +214,4 @@ function! shellbridge#kill()
   call system("shellbridge -k '" . getline('.') . "'")
 endfunction
 
-nnoremap <m-n> :call shellbridge#init()<cr>
+exec "nnoremap " . g:shellbridge_init . ' :call shellbridge#init()<cr>'
