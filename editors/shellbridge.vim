@@ -101,11 +101,11 @@ function! shellbridge#update_meta(id, onlycmd, pad)
 endfunction
 
 function! shellbridge#previous_cmd()
-  return search("^%", "bn")
+  return search("^%.*|", "bn")
 endfunction
 
 function! shellbridge#next_cmd()
-  return search("^%", "n")
+  return search("^%.*|", "n")
 endfunction
 
 
