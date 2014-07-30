@@ -63,4 +63,4 @@ Supported multiline execution and added output buffer
 Getting Involved
 ================
 
-This simple project is fun. Feel free to ask question or contribute. :)
+This simple project is fun. I enjoy so much working on it. Please feel free to ask me/file an issue if you got any problem on setup. Any suggestions are welcome. Thank you so much for give it a try. :)
