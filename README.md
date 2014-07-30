@@ -12,7 +12,7 @@ Demo on vim
 
 
 Prerequisite
-============
+------------
 
 * vim 7.3+ compiled with +client-server option
 * newer nodejs
@@ -25,7 +25,7 @@ For Ubuntu 12.04, please install newer node and npm from PPA and the official in
 
 
 How to install
-==============
+--------------
 
 1. `sudo npm install -g shellbridge`
 2. `shellbridge --server` to start the daemon
@@ -36,7 +36,7 @@ How to install
 
 
 Q & A
-=====
+-----
 
 #### How can I run with root?
 
@@ -48,7 +48,7 @@ Q & A
 
 
 Updates
-=======
+-------
 
 #### 0.1.10
 
@@ -73,6 +73,6 @@ Supported multiline execution and added output buffer
 
 
 Getting Involved
-================
+----------------
 
 This simple project is fun. I enjoy so much working on it. Please feel free to ask/file issue if you got any problem on setup. Any suggestions are welcome. Thanks so much for giving it a try. :)
