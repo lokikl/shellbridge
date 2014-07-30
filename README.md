@@ -6,7 +6,7 @@ shellbridge is a daemon written in javascript, enabling an interactive shell exp
 
 
 Demo on vim
-===========
+-----------
 
 ![alt tag](https://raw.githubusercontent.com/lokikl/shellbridge/master/demo/vim-demo.gif)
 
@@ -38,11 +38,11 @@ How to install
 Q & A
 =====
 
-### 1. How can I run with root?
+#### How can I run with root?
 
 `echo <your pwd> | sudo -S bash` will do the trick. For convenient, you may add a mapping to your `~/.shellbridgerc`, having a quick start next time.
 
-### 2. How can I run mysql client in shellbridge?
+#### How can I run mysql client?
 
 `mysql -n` is a good start. A mapping is shipped in the default shellbridgerc, so you should be able to start the mysql client by only `mysql`. 
 
