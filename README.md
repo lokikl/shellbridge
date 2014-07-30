@@ -53,16 +53,19 @@ Sure, in fact shellbridge interact with editors thru only 2 commands: insertCmd 
 #### Can I change those key mappings in vim?
 
 Yes, every key mapping can be changed. Feel free to add mapping below in your `~/.vimrc`
-``
-let g:shellbridge_init = "<m-n>"
-let g:shellbridge_exec = "<m-n>"
-let g:shellbridge_kill = "<m-d>"
-let g:shellbridge_cleanup = "<m-c>"
-let g:shellbridge_select = "<m-v>"
-let g:shellbridge_next = "<m-j>"
-let g:shellbridge_previous = "<m-k>"
-let g:shellbridge_sort = "<m-s>"
-``
+
+`let g:shellbridge_init = "<m-n>"`
+
+Available mappings are
+`g:shellbridge_init`
+`g:shellbridge_exec`
+`g:shellbridge_kill`
+`g:shellbridge_cleanup`
+`g:shellbridge_select`
+`g:shellbridge_next`
+`g:shellbridge_previous`
+`g:shellbridge_sort`
+
 
 
 Updates
