@@ -7,6 +7,3 @@
     "^irb": { "replace": "irb -f --noprompt" }
   }
 }
-
-// to use ssh
-// try `ssh <server> "bash"`
