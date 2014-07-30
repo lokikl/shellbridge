@@ -40,11 +40,15 @@ Q & A
 
 #### How can I run with root?
 
-`echo <your pwd> | sudo -S bash` will do the trick. For convenient, you may add a mapping to your `~/.shellbridgerc`, having a quick start next time.
+`echo <your pwd> | sudo -S bash` will do the trick. For convenient, you could map it in your `~/.shellbridgerc` to have a quick start next time.
 
-#### How can I run mysql client?
+#### How can I run the mysql client?
 
-`mysql -n` is a good start. A mapping is shipped in the default shellbridgerc, so you should be able to start the mysql client by only `mysql`. 
+You may start by `mysql -n`. A mapping is shipped in the default shellbridgerc, you should be able to start it by `mysql` only. 
+
+#### Can shellbridge be run on editors other than vim?
+
+Sure, in fact shellbridge interact with editors thru only 2 commands: insertCmd & editorCmd. shellbridge can talk to everything has these 2 APIs implemented. The first step would be configuring your `~/.shellbridgerc` and hack your favourite editor.
 
 
 Updates
