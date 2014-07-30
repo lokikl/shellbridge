@@ -35,6 +35,18 @@ How to install
 6. Insert `echo 123` then `Alt-n` to execute the line
 
 
+Q & A
+=====
+
+### 1. How can I run with root?
+
+`echo <your pwd> | sudo -S bash` will do the trick. For convenient, you may add a mapping to your `~/.shellbridgerc`, having a quick start next time.
+
+### 2. How can I run mysql client in shellbridge?
+
+`mysql -n` is a good start. A mapping is shipped in the default shellbridgerc, so you should be able to start the mysql client by only `mysql`. 
+
+
 Updates
 =======
 
