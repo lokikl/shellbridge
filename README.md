@@ -44,7 +44,7 @@ Q & A
 
 #### How can I run the mysql client?
 
-You may start by `mysql -n`. A mapping is shipped in the default shellbridgerc, you should be able to start it by `mysql` only. 
+You may start by `mysql -n`. A mapping is shipped in the default shellbridgerc, you should be able to start it by `mysql` only.
 
 #### Can shellbridge be run on editors other than vim?
 
@@ -65,11 +65,16 @@ Available mappings are
 `g:shellbridge_next`
 `g:shellbridge_previous`
 `g:shellbridge_sort`
+`g:shellbridge_filter`
 
 
 
 Updates
 -------
+
+#### 0.1.12
+
+* supported filtering output by `alt f`
 
 #### 0.1.10
 

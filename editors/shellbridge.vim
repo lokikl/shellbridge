@@ -12,6 +12,15 @@ if !has("gui_running")
   set ttimeout ttimeoutlen=50
 endif
 
+" get input from user in status bar
+function! Prompt(query, default)
+  call inputsave()
+  let input = input(a:query, a:default)
+  call inputrestore()
+  redraw
+  return input
+endfunction
+
 " default value of key mappings
 function! s:SetDefault(name, default)
   if !exists(a:name)
@@ -26,6 +35,7 @@ call s:SetDefault("g:shellbridge_select", "<m-v>")
 call s:SetDefault("g:shellbridge_next", "<m-j>")
 call s:SetDefault("g:shellbridge_previous", "<m-k>")
 call s:SetDefault("g:shellbridge_sort", "<m-s>")
+call s:SetDefault("g:shellbridge_filter", "<m-f>")
 
 " get line number of the number to append output
 function! shellbridge#get_last_line(line)
@@ -127,7 +137,8 @@ function! shellbridge#init()
     \["n", g:shellbridge_select, ":call shellbridge#select_output()<cr>"],
     \["n", g:shellbridge_sort, ":call shellbridge#select_output()<cr>:!sort<cr>"],
     \["n", g:shellbridge_next, ":call search('%', '')<cr>"],
-    \["n", g:shellbridge_previous, ":call search('%', 'b')<cr>"]
+    \["n", g:shellbridge_previous, ":call search('%', 'b')<cr>"],
+    \["n", g:shellbridge_filter, ":call shellbridge#filter()<cr>"]
   \]
   for mapping in mappings
     exec mapping[0] . "noremap <buffer> <silent> " . mapping[1] . ' ' . mapping[2]
@@ -142,6 +153,7 @@ function! shellbridge#init()
         \# " . g:shellbridge_sort . ": Sort command output\n
         \# " . g:shellbridge_next . ": Jump to next command\n
         \# " . g:shellbridge_previous . ": Jump to previous command\n
+        \# " . g:shellbridge_filter . ": Filter output\n
         \\n\n"
   0put =help
 endfunction
@@ -160,6 +172,19 @@ function! shellbridge#on_message(id, msg)
     exec "silent normal! " . oline . "G" . ocol . "|"
     exec "nohlsearch"
     exec "redraw"
+  endif
+endfunction
+
+" prompt user and filter output by input
+function! shellbridge#filter()
+  let l = line('.')
+  let [s, e] = [l + 1, shellbridge#get_last_line(l)]
+  if s <= e
+    let key = Prompt("Filter Key: ", "")
+    if key != "" | exec s . "," . e . "v/" . key . "/d" | endif
+    exec l
+  else
+    echo "No output found"
   endif
 endfunction
 
