@@ -37,6 +37,10 @@ call s:SetDefault("g:shellbridge_previous", "<m-k>")
 call s:SetDefault("g:shellbridge_sort", "<m-s>")
 call s:SetDefault("g:shellbridge_filter", "<m-f>")
 
+if !exists("g:shellbridge_done_cmd")
+  let g:shellbridge_done_cmd = []
+endif
+
 " get line number of the number to append output
 function! shellbridge#get_last_line(line)
   let last = line('$')
@@ -118,14 +122,18 @@ function! shellbridge#next_cmd()
   return search("^%.*|", "n")
 endfunction
 
-
 function! shellbridge#init()
   if v:servername == ""
     echoerr "Please start vim with --servername option" | return
   endif
+  " register highlight group indicating done!
   tabnew
   setl nowrap conceallevel=2 concealcursor=inv
-  setl noai nocin nosi inde= sts=0 sw=2 ts=2 ft=sh
+  setl noai nocin nosi inde= sts=0 sw=2 ts=2
+  setl ft=sh
+  hi shellbridge_done guifg=darkgray
+  " syn clear shellbridge_done
+  syn match shellbridge_done /%done|.*\(\n .*\)*/ contains=XXXConcealed
   syntax match XXXConcealed /%.*|/ conceal cchar=›
 
   let mappings = [
@@ -147,15 +155,27 @@ function! shellbridge#init()
   nmap <m-o> <c-w>gF
   " print help message
   let help = "# Welcome to shellbridge, below are your key mappings\n
-        \# " . g:shellbridge_exec . ": Execute commands\n
-        \# " . g:shellbridge_kill . ": Kill a running process\n
-        \# " . g:shellbridge_cleanup . ": Cleanup command output\n
-        \# " . g:shellbridge_sort . ": Sort command output\n
-        \# " . g:shellbridge_next . ": Jump to next command\n
-        \# " . g:shellbridge_previous . ": Jump to previous command\n
-        \# " . g:shellbridge_filter . ": Filter output\n
-        \\n\n"
+    \# " . g:shellbridge_exec . ": Execute commands\n
+    \# " . g:shellbridge_kill . ": Kill a running process\n
+    \# " . g:shellbridge_cleanup . ": Cleanup command output\n
+    \# " . g:shellbridge_sort . ": Sort command output\n
+    \# " . g:shellbridge_next . ": Jump to next command\n
+    \# " . g:shellbridge_previous . ": Jump to previous command\n
+    \# " . g:shellbridge_filter . ": Filter output\n
+    \\n\n"
   0put =help
+endfunction
+
+" set 1 process to done
+function! shellbridge#set_done(id, line)
+  let g:shellbridge_done_cmd += [a:id]
+  exec a:line . "s/%.*|/%done|/"
+  " let lastLine = shellbridge#get_last_line(a:line) * 1
+  " let l = a:line * 1
+  " while l <= lastLine
+  "   call matchadd("shellbridge_done", '/\%' . l . 'l/')
+  "   let l += 1
+  " endwhile
 endfunction
 
 " called by server.js
@@ -163,15 +183,22 @@ function! shellbridge#on_message(id, msg)
   let [oline, ocol] = [line('.'), col('.')] " backup cursor pos
   let cmdLine = shellbridge#get_line_of_id(a:id)
   if cmdLine > 0 " when last line exist
-    let lastLine = shellbridge#get_last_line(cmdLine)
-    let output = substitute(a:msg, "&#39;", "'", "g")
-    let output = substitute(output, "", "", "g")
-    let spad = indent(cmdLine) == 2 ? "    " : "  "
-    let output = spad . substitute(output, "\n", "\n".spad, "g")
-    exec "silent " . lastLine . "put =output"
-    exec "silent normal! " . oline . "G" . ocol . "|"
-    exec "nohlsearch"
-    exec "redraw"
+    if a:msg == "!!done" " command is done
+      call shellbridge#set_done(a:id, cmdLine)
+      return
+      " else " set back to active (restarted shellbridge server
+        " call filter(g:shellbridge_done_cmd, 'v:val != "' . a:id . '"')
+    else
+      let lastLine = shellbridge#get_last_line(cmdLine)
+      let output = substitute(a:msg, "&#39;", "'", "g")
+      let output = substitute(output, "", "", "g")
+      let spad = indent(cmdLine) == 2 ? "    " : "  "
+      let output = spad . substitute(output, "\n", "\n".spad, "g")
+      exec "silent " . lastLine . "put =output"
+      exec "silent normal! " . oline . "G" . ocol . "|"
+      exec "nohlsearch"
+      exec "redraw"
+    endif
   endif
 endfunction
 
@@ -200,6 +227,10 @@ function! shellbridge#exec()
     if prevLine > 0 && prevLine < execline
       call shellbridge#cleanup_active_flags(prevLine)
       let id = shellbridge#get_id_from_line(prevLine)
+      if count(g:shellbridge_done_cmd, id + '') > 0
+        echo 'Original command is ended already'
+        return
+      endif
       call shellbridge#update_meta(id, onlycmd, '  ')
     endif
   else " primary cmd
@@ -236,7 +267,12 @@ function! shellbridge#exec_multiline()
 endfunction
 
 function! shellbridge#kill()
-  call system("shellbridge -k '" . getline('.') . "'")
+  let id = shellbridge#get_id_from_line('.')
+  if count(g:shellbridge_done_cmd, id + '') == 0 " eq 0 mean not ended
+    call system("shellbridge -k '" . getline('.') . "'")
+  else
+    echo "Command is ended already"
+  endif
 endfunction
 
 exec "nnoremap " . g:shellbridge_init . ' :call shellbridge#init()<cr>'
