@@ -37,10 +37,6 @@ call s:SetDefault("g:shellbridge_previous", "<m-k>")
 call s:SetDefault("g:shellbridge_sort", "<m-s>")
 call s:SetDefault("g:shellbridge_filter", "<m-f>")
 
-if !exists("g:shellbridge_done_cmd")
-  let g:shellbridge_done_cmd = []
-endif
-
 " get line number of the number to append output
 function! shellbridge#get_last_line(line)
   let last = line('$')
@@ -71,9 +67,15 @@ function! shellbridge#get_cmd(line)
   return substitute(onlycmd, "^ *", "", "")
 endfunction
 
+" get id from current line meta data
+" return 'done' when done
 function! shellbridge#get_id_from_line(line)
   let content = getline(a:line)
-  return split(matchstr(content, "%\\d*"), '%')[0]
+  if content =~ "%done"
+    return 'done'
+  else
+    return split(matchstr(content, "%\\d*"), '%')[0]
+  endif
 endfunction
 
 function! shellbridge#form_cmd(id, onlycmd)
@@ -166,28 +168,14 @@ function! shellbridge#init()
   0put =help
 endfunction
 
-" set 1 process to done
-function! shellbridge#set_done(id, line)
-  let g:shellbridge_done_cmd += [a:id]
-  exec a:line . "s/%.*|/%done|/"
-  " let lastLine = shellbridge#get_last_line(a:line) * 1
-  " let l = a:line * 1
-  " while l <= lastLine
-  "   call matchadd("shellbridge_done", '/\%' . l . 'l/')
-  "   let l += 1
-  " endwhile
-endfunction
-
 " called by server.js
 function! shellbridge#on_message(id, msg)
   let [oline, ocol] = [line('.'), col('.')] " backup cursor pos
   let cmdLine = shellbridge#get_line_of_id(a:id)
   if cmdLine > 0 " when last line exist
     if a:msg == "!!done" " command is done
-      call shellbridge#set_done(a:id, cmdLine)
+      exec cmdLine . "s/%.*|/%done|/"
       return
-      " else " set back to active (restarted shellbridge server
-        " call filter(g:shellbridge_done_cmd, 'v:val != "' . a:id . '"')
     else
       let lastLine = shellbridge#get_last_line(cmdLine)
       let output = substitute(a:msg, "&#39;", "'", "g")
@@ -227,7 +215,7 @@ function! shellbridge#exec()
     if prevLine > 0 && prevLine < execline
       call shellbridge#cleanup_active_flags(prevLine)
       let id = shellbridge#get_id_from_line(prevLine)
-      if count(g:shellbridge_done_cmd, id + '') > 0
+      if id == "done"
         echo 'Original command is ended already'
         return
       endif
@@ -268,7 +256,7 @@ endfunction
 
 function! shellbridge#kill()
   let id = shellbridge#get_id_from_line('.')
-  if count(g:shellbridge_done_cmd, id + '') == 0 " eq 0 mean not ended
+  if id != "done"
     call system("shellbridge -k '" . getline('.') . "'")
   else
     echo "Command is ended already"
