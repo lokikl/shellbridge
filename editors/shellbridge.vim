@@ -37,6 +37,18 @@ call s:SetDefault("g:shellbridge_previous", "<m-k>")
 call s:SetDefault("g:shellbridge_sort", "<m-s>")
 call s:SetDefault("g:shellbridge_filter", "<m-f>")
 
+" get id and status of a line
+" %1a| xxxxx           : active
+" %14d| xxxxx          : done
+function! shellbridge#get_meta(line)
+  
+endfunction
+
+" ask shellbridge for the next id
+function! shellbridge#request_next_id()
+  return system("shellbridge --request-id")
+endfunction
+
 " get line number of the number to append output
 function! shellbridge#get_last_line(line)
   let last = line('$')
@@ -221,16 +233,18 @@ function! shellbridge#exec()
       call shellbridge#update_meta(id, onlycmd, '  ')
     endif
   else " primary cmd
-    call shellbridge#cleanup_active_flags(execline)
-    call shellbridge#update_meta('current', onlycmd, '')
+    let id = shellbridge#request_next_id()
+    echo id
+    " call shellbridge#cleanup_active_flags(execline)
+    " call shellbridge#update_meta('current', onlycmd, '')
   endif
-  call shellbridge#cleanup_indented(execline)
-  let output = system(shellbridge#form_cmd(id, onlycmd))
-
-  if ind == 0 " primary cmd
-    let id = substitute(output, "\n$", "", "")
-    call shellbridge#update_meta(id, onlycmd, '')
-  end
+  " call shellbridge#cleanup_indented(execline)
+  " let output = system(shellbridge#form_cmd(id, onlycmd))
+  "
+  " if ind == 0 " primary cmd
+  "   let id = substitute(output, "\n$", "", "")
+  "   call shellbridge#update_meta(id, onlycmd, '')
+  " end
 endfunction
 
 function! shellbridge#exec_multiline()

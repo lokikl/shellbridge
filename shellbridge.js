@@ -4,6 +4,7 @@ var stdio = require('stdio');
 
 var ops = stdio.getopt({
   'server': {description: 'Start shellbridge server'},
+  'request-id': {description: 'Request for next id'},
   'id': {key: 'i', description: 'Session id', args: 1},
   'session': {key: 's', description: 'Session name', args: 1},
   'directory': {key: 'd', description: 'Working directory', args: 1},
