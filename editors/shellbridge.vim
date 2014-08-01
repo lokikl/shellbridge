@@ -174,7 +174,7 @@ function! shellbridge#on_message(id, msg)
   let cmdLine = shellbridge#get_line_of_id(a:id)
   if cmdLine > 0 " when last line exist
     if a:msg == "!!done" " command is done
-      exec cmdLine . "s/%.*|/%done|/"
+      " exec cmdLine . "s/%.*|/%done|/"
       return
     else
       let lastLine = shellbridge#get_last_line(cmdLine)
@@ -184,8 +184,7 @@ function! shellbridge#on_message(id, msg)
       let output = spad . substitute(output, "\n", "\n".spad, "g")
       exec "silent " . lastLine . "put =output"
       exec "silent normal! " . oline . "G" . ocol . "|"
-      exec "nohlsearch"
-      exec "redraw"
+      exec "nohlsearch | redraw"
     endif
   endif
 endfunction
