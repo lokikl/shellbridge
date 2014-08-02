@@ -37,16 +37,60 @@ call s:SetDefault("g:shellbridge_previous", "<m-k>")
 call s:SetDefault("g:shellbridge_sort", "<m-s>")
 call s:SetDefault("g:shellbridge_filter", "<m-f>")
 
-" get id and status of a line
-" %1a| xxxxx           : active
-" %14d| xxxxx          : done
-function! shellbridge#get_meta(line)
-  
+" get flag from a line
+" %1a| xxxxx           : a(active)
+" %14d| xxxxx          : d(done)
+function! shellbridge#get_flag(line)
+  let meta = matchstr(getline(a:line), "%\\d*.|")
+  if meta == '' | return '' | endif
+  return strpart(meta, strlen(meta)-2, 1)
 endfunction
 
-" ask shellbridge for the next id
+" get cmd part of current line (removed meta)
+" remove the meta tag if there is any
+" remove any leading spaces
+function! shellbridge#extract_cmd(line)
+  let cmd = substitute(getline(a:line), " *%\\d*.| ", "", "")
+  return substitute(cmd, "^ *", "", "")
+endfunction
+
+function! shellbridge#update_meta(id, is_primary, ...)
+  let flag = exists('a:1') ? a:1 : 'a'
+  let lineno = exists('a:2') ? a:2 : line('.')
+  let pad = a:is_primary ? '' : '  '
+  let cmd = shellbridge#extract_cmd(lineno)
+  let outputLine = pad . "%" . a:id . flag . "| " . cmd
+
+  let oline = line('.')
+  exec lineno
+  s/.*/\=outputLine/
+  exec oline
+
+  exec "nohlsearch | redraw"
+endfunction
+
+" ask shellbridge server for the next id
 function! shellbridge#request_next_id()
-  return system("shellbridge --request-id")
+  return substitute(system('shellbridge --request-id'), '\n$', '', '')
+endfunction
+
+" send cmd part of current line to shellbridge server
+function! shellbridge#execute_current_line(id)
+  let c = shellbridge#extract_cmd('.')
+  let escaped_cmd = "'" . substitute(c, "=", '\\=', "") . "'"
+  let cmd = join([
+    \"shellbridge",
+    \"-i", a:id,
+    \"-s", v:servername,
+    \"-d", getcwd(),
+    \escaped_cmd
+  \])
+  call system(cmd)
+endfunction
+
+" get line number of id
+function! shellbridge#get_line_of_id(id)
+  return search("%".a:id."a|", "n")
 endfunction
 
 " get line number of the number to append output
@@ -62,80 +106,47 @@ function! shellbridge#get_last_line(line)
   return l - 1
 endfunction
 
-function! shellbridge#get_line_of_id(id)
-  let l = search("%".a:id."!|", "n")
-  if l == 0
-    return search("%current!|", "n")
-  else
-    return l
-  endif
-endfunction
-
-function! shellbridge#get_cmd(line)
-  let cmdLine = getline(a:line)
-  " remove the meta tag if there is any
-  let onlycmd = substitute(cmdLine, " *%.*| ", "", "")
-  " remove any heading spaces
-  return substitute(onlycmd, "^ *", "", "")
-endfunction
-
 " get id from current line meta data
 " return 'done' when done
 function! shellbridge#get_id_from_line(line)
   let content = getline(a:line)
-  if content =~ "%done"
-    return 'done'
-  else
-    return split(matchstr(content, "%\\d*"), '%')[0]
-  endif
+  return split(matchstr(content, "%\\d*"), '%')[0]
 endfunction
 
-function! shellbridge#form_cmd(id, onlycmd)
-  let escaped_cmd = "'" . substitute(a:onlycmd, "=", '\\=', "") . "'"
-  return join([
-    \"shellbridge",
-    \"-i", a:id,
-    \"-s", v:servername,
-    \"-d", getcwd(),
-    \escaped_cmd
-  \])
+" change a to i for all meta data on id
+" add e flag in substitute for not throwing error when not found
+function! shellbridge#cleanup_active_flag(id)
+  let [oline, ocol] = [line('.'), col('.')] " backup cursor pos
+  exec "%s/%" . a:id . "a|/%" . a:id . "i|/e"
+  exec "silent normal! " . oline . "G" . ocol . "|"
 endfunction
 
+" cleanup old output of a primary cmd or a sub cmd
 function! shellbridge#cleanup_indented(line)
   let [s, e] = [a:line + 1, shellbridge#get_last_line(a:line)]
-  if s <= e
-    exec s . ',' . e . 'd' | exec s - 1
-  endif
+  if s > e | return | endif
+  exec s . ',' . e . 'd' | exec s - 1
 endfunction
 
+" line select output
 function! shellbridge#select_output()
   let [s, e] = [line('.') + 1, shellbridge#get_last_line(line('.'))]
-  if s <= e
-    exec e
-    normal V
-    exec s
-  endif
+  if s > e | return | endif
+  exec e | normal V
+  exec s
 endfunction
 
-function! shellbridge#cleanup_active_flags(line)
-  let [curLineNo, prevLineEnd] = [line('.'), shellbridge#get_last_line(a:line)]
-  exec a:line . "," . prevLineEnd . "s/!|/|/e"
-  exec curLineNo
-endfunction
-
-function! shellbridge#update_meta(id, onlycmd, pad)
-  let outputLine = a:pad . "%" . a:id . "!| " . a:onlycmd
-  s/.*/\=outputLine/
-endfunction
-
+" get line number of prev cmd
 function! shellbridge#previous_cmd()
-  return search("^%.*|", "bn")
+  return search("^%\\d*.|", "bn")
 endfunction
 
+" get line number of next cmd
 function! shellbridge#next_cmd()
-  return search("^%.*|", "n")
+  return search("^%\\d*.|", "n")
 endfunction
 
+" open a new tab in vim and initialize the shellbridge client
 function! shellbridge#init()
   if v:servername == ""
     echoerr "Please start vim with --servername option" | return
@@ -172,6 +183,7 @@ function! shellbridge#init()
     \# " . g:shellbridge_exec . ": Execute commands\n
     \# " . g:shellbridge_kill . ": Kill a running process\n
     \# " . g:shellbridge_cleanup . ": Cleanup command output\n
+    \# " . g:shellbridge_select . ": Line select command output\n
     \# " . g:shellbridge_sort . ": Sort command output\n
     \# " . g:shellbridge_next . ": Jump to next command\n
     \# " . g:shellbridge_previous . ": Jump to previous command\n
@@ -183,21 +195,19 @@ endfunction
 " called by server.js
 function! shellbridge#on_message(id, msg)
   let [oline, ocol] = [line('.'), col('.')] " backup cursor pos
-  let cmdLine = shellbridge#get_line_of_id(a:id)
-  if cmdLine > 0 " when last line exist
-    if a:msg == "!!done" " command is done
-      " exec cmdLine . "s/%.*|/%done|/"
-      return
-    else
-      let lastLine = shellbridge#get_last_line(cmdLine)
-      let output = substitute(a:msg, "&#39;", "'", "g")
-      let output = substitute(output, "", "", "g")
-      let spad = indent(cmdLine) == 2 ? "    " : "  "
-      let output = spad . substitute(output, "\n", "\n".spad, "g")
-      exec "silent " . lastLine . "put =output"
-      exec "silent normal! " . oline . "G" . ocol . "|"
-      exec "nohlsearch | redraw"
-    endif
+  let lineno = shellbridge#get_line_of_id(a:id)
+  if lineno == 0 | return | endif " reject if not found
+  if a:msg == "!!done" " command is done
+    call shellbridge#update_meta(a:id, 1, 'd', lineno)
+  else
+    let lastLine = shellbridge#get_last_line(lineno)
+    let output = substitute(a:msg, "&#39;", "'", "g")
+    let output = substitute(output, "", "", "g")
+    let spad = indent(lineno) == 2 ? "    " : "  "
+    let output = spad . substitute(output, "\n", "\n".spad, "g")
+    exec "silent " . lastLine . "put =output"
+    exec "silent normal! " . oline . "G" . ocol . "|"
+    exec "nohlsearch | redraw"
   endif
 endfunction
 
@@ -216,64 +226,63 @@ endfunction
 
 " called in vim key binding
 function! shellbridge#exec()
-  let execline = line('.')
-  let ind = indent(execline)
-  let onlycmd = shellbridge#get_cmd(execline)
+  let lineno = line('.')
+  call shellbridge#cleanup_indented(lineno)
 
+  let is_primary = indent(lineno) == 0
   let id = -1
-  if ind > 0 " sub-cmd
-    let prevLine = shellbridge#previous_cmd()
-    if prevLine > 0 && prevLine < execline
-      call shellbridge#cleanup_active_flags(prevLine)
-      let id = shellbridge#get_id_from_line(prevLine)
-      if id == "done"
-        echo 'Original command is ended already'
-        return
-      endif
-      call shellbridge#update_meta(id, onlycmd, '  ')
-    endif
-  else " primary cmd
+  if is_primary
     let id = shellbridge#request_next_id()
-    echo id
-    " call shellbridge#cleanup_active_flags(execline)
-    " call shellbridge#update_meta('current', onlycmd, '')
+    call shellbridge#update_meta(id, is_primary)
+  else " sub cmd
+    let prevLineNo = shellbridge#previous_cmd()
+    if prevLineNo == 0 || prevLineNo >= lineno
+      echo "Parent command not found" | return
+    endif
+    let id = shellbridge#get_id_from_line(prevLineNo)
+    call shellbridge#cleanup_active_flag(id)
+    if shellbridge#get_flag(prevLineNo) == 'd'
+      echo 'Original command is ended already' | return
+    endif
+    call shellbridge#update_meta(id, is_primary)
   endif
-  " call shellbridge#cleanup_indented(execline)
-  " let output = system(shellbridge#form_cmd(id, onlycmd))
-  "
-  " if ind == 0 " primary cmd
-  "   let id = substitute(output, "\n$", "", "")
-  "   call shellbridge#update_meta(id, onlycmd, '')
-  " end
+  call shellbridge#execute_current_line(id)
 endfunction
 
+" execute multiple lines (line selected)
 function! shellbridge#exec_multiline()
   let [nstart, nend] = [line("'<"), line("'>")]
-  let ind = indent(nstart)
+  let is_primary = indent(nstart) == 0
+  if !is_primary | echo "Please execute subcmd line by line." | return | endif
+
   while nend >= nstart
-    if indent(nend) != ind
+    " depends on indentation, mark it executable or remove it
+    if indent(nend) != 0
       exec nend | normal dd
     else
-      exec nend . 's/\</%pending| /'
+      exec nend . 's/\</%0p| /'
     endif
     let nend -= 1
   endwhile
-
+  " execute executable lines
   while 1
-    let l = search("%pending|")
+    let l = search("%0p|")
     if l == 0 | break | endif
+    call shellbridge#update_meta(0, is_primary) " change 0p to 0a
     call shellbridge#exec()
     sleep 50ms
   endwhile
 endfunction
 
+" kill a running process
 function! shellbridge#kill()
   let id = shellbridge#get_id_from_line('.')
-  if id != "done"
-    call system("shellbridge -k '" . getline('.') . "'")
+  if shellbridge#get_flag('.') == 'd'
+    echo 'This command is ended already'
   else
-    echo "Command is ended already"
+    call system("shellbridge -k '" . id . "'")
   endif
 endfunction
 
+" map the init key to initialize shellbridge client
 exec "nnoremap " . g:shellbridge_init . ' :call shellbridge#init()<cr>'

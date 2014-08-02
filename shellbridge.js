@@ -8,7 +8,7 @@ var ops = stdio.getopt({
   'id': {key: 'i', description: 'Session id', args: 1},
   'session': {key: 's', description: 'Session name', args: 1},
   'directory': {key: 'd', description: 'Working directory', args: 1},
-  'kill': {key: 'k', description: 'Kill process'}
+  'kill': {key: 'k', description: 'Kill process', args: 1}
 });
 
 if (ops.server) {
