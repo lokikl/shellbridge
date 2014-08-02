@@ -156,10 +156,7 @@ function! shellbridge#init()
   setl nowrap conceallevel=2 concealcursor=inv
   setl noai nocin nosi inde= sts=0 sw=2 ts=2
   setl ft=sh
-  hi shellbridge_done guifg=darkgray
-  " syn clear shellbridge_done
-  syn match shellbridge_done /%done|.*\(\n .*\)*/ contains=XXXConcealed
-  syntax match XXXConcealed /%.*|/ conceal cchar=›
+  syntax match XXXConcealed /%\d*.|/ conceal cchar=›
 
   let mappings = [
     \["n", g:shellbridge_exec, ":call shellbridge#exec()<cr>"],
@@ -190,6 +187,10 @@ function! shellbridge#init()
     \# " . g:shellbridge_filter . ": Filter output\n
     \\n\n"
   0put =help
+  " syntax highlight commands that done
+  " syn clear shellbridge_done
+  hi shellbridge_done guifg=darkgray
+  syn match shellbridge_done /%\d*d|.*\(\n .*\)*/ contains=XXXConcealed
 endfunction
 
 " called by server.js
@@ -198,7 +199,8 @@ function! shellbridge#on_message(id, msg)
   let lineno = shellbridge#get_line_of_id(a:id)
   if lineno == 0 | return | endif " reject if not found
   if a:msg == "!!done" " command is done
-    call shellbridge#update_meta(a:id, 1, 'd', lineno)
+    let primary_lineno = search("^%".a:id.".|", "n")
+    call shellbridge#update_meta(a:id, 1, 'd', primary_lineno)
   else
     let lastLine = shellbridge#get_last_line(lineno)
     let output = substitute(a:msg, "&#39;", "'", "g")
@@ -252,15 +254,14 @@ endfunction
 " execute multiple lines (line selected)
 function! shellbridge#exec_multiline()
   let [nstart, nend] = [line("'<"), line("'>")]
-  let is_primary = indent(nstart) == 0
-  if !is_primary | echo "Please execute subcmd line by line." | return | endif
-
+  let ind = indent(nstart)
+  let is_primary = ind == 0
   while nend >= nstart
     " depends on indentation, mark it executable or remove it
-    if indent(nend) != 0
+    if indent(nend) != ind
       exec nend | normal dd
     else
-      exec nend . 's/\</%0p| /'
+      call shellbridge#update_meta(0, is_primary, 'p', nend) " change to 0p
     endif
     let nend -= 1
   endwhile
@@ -270,7 +271,7 @@ function! shellbridge#exec_multiline()
     if l == 0 | break | endif
     call shellbridge#update_meta(0, is_primary) " change 0p to 0a
     call shellbridge#exec()
-    sleep 50ms
+    sleep 100ms
   endwhile
 endfunction
 
