@@ -98,10 +98,7 @@ Updates
 
 #### 0.1.3
 
-Supported multiple line execution and added output buffer
-
-![alt tag](https://raw.githubusercontent.com/lokikl/shellbridge/master/demo/multiline_output_buffer.gif)
-
+* Supported multiple line execution and added output buffer
 
 Getting Involved
 ----------------
