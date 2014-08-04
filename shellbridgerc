@@ -3,7 +3,7 @@
   "editorCmd": "vim --servername %s --remote-expr '%c'",
   "logEditorCmd": false,
   "commands": {
-    "^mysql": { "replace": "mysql -n" },
+    "^mysql": { "replace": "mysql -nf" },
     "^irb": { "replace": "irb -f --noprompt" }
   }
 }
