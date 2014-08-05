@@ -155,8 +155,7 @@ function! shellbridge#init()
   tabnew
   setl nowrap conceallevel=2 concealcursor=inv
   setl noai nocin nosi inde= sts=0 sw=2 ts=2
-  setl ft=sh
-  syntax match XXXConcealed /%\d*.|/ conceal cchar=›
+  " setl ft=sh
 
   let mappings = [
     \["n", g:shellbridge_exec, ":call shellbridge#exec()<cr>"],
@@ -189,6 +188,9 @@ function! shellbridge#init()
   0put =help
   " syntax highlight commands that done
   " syn clear shellbridge_done
+  syntax match XXXConcealed /%\d*.|/ conceal cchar=›
+  hi comment guifg=darkgray
+  syn match comment /#.*/
   hi shellbridge_done guifg=darkgray
   syn match shellbridge_done /%\d*d|.*\(\n .*\)*/ contains=XXXConcealed
 endfunction
