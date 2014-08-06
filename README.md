@@ -72,6 +72,13 @@ Available mappings are
 Updates
 -------
 
+#### 0.1.17
+
+* supported performing actions below inside output
+** clear
+** sort
+** filter
+
 #### 0.1.13
 
 * added syntax highlight to ended commands
