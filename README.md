@@ -75,9 +75,9 @@ Updates
 #### 0.1.17
 
 * supported performing actions below inside output
-** clear
-** sort
-** filter
+  * clear
+  * sort
+  * filter
 
 #### 0.1.13
 
