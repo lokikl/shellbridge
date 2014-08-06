@@ -65,8 +65,6 @@ function! shellbridge#update_meta(id, is_primary, ...)
   exec lineno
   s/.*/\=outputLine/
   exec oline
-
-  exec "nohlsearch | redraw"
 endfunction
 
 " ask shellbridge server for the next id
@@ -121,16 +119,30 @@ function! shellbridge#cleanup_active_flag(id)
   exec "silent normal! " . oline . "G" . ocol . "|"
 endfunction
 
+" check if line is command (check if meta data exists)
+function! shellbridge#is_command(line)
+  let meta = matchstr(getline(a:line), "%\\d*.|")
+  return meta != ''
+endfunction
+
+" cleanup output, triggered by user
+function! shellbridge#user_cleanup_indented()
+  let l = shellbridge#get_nearest_command()
+  call shellbridge#cleanup_indented(l)
+endfunction
+
 " cleanup old output of a primary cmd or a sub cmd
 function! shellbridge#cleanup_indented(line)
-  let [s, e] = [a:line + 1, shellbridge#get_last_line(a:line)]
+  let l = a:line
+  let [s, e] = [l + 1, shellbridge#get_last_line(l)]
   if s > e | return | endif
   exec s . ',' . e . 'd' | exec s - 1
 endfunction
 
 " line select output
 function! shellbridge#select_output()
-  let [s, e] = [line('.') + 1, shellbridge#get_last_line(line('.'))]
+  let l = shellbridge#get_nearest_command()
+  let [s, e] = [l + 1, shellbridge#get_last_line(l)]
   if s > e | return | endif
   exec e | normal V
   exec s
@@ -162,7 +174,7 @@ function! shellbridge#init()
     \["i", g:shellbridge_exec, "<esc>:call shellbridge#exec()<cr>"],
     \["v", g:shellbridge_exec, "<esc>:call shellbridge#exec_multiline()<cr>"],
     \["n", g:shellbridge_kill, ":call shellbridge#kill()<cr>"],
-    \["n", g:shellbridge_cleanup, ":call shellbridge#cleanup_indented(line('.'))<cr>"],
+    \["n", g:shellbridge_cleanup, ":call shellbridge#user_cleanup_indented()<cr>"],
     \["n", g:shellbridge_select, ":call shellbridge#select_output()<cr>"],
     \["n", g:shellbridge_sort, ":call shellbridge#select_output()<cr>:!sort<cr>"],
     \["n", g:shellbridge_next, ":call search('%', '')<cr>"],
@@ -215,9 +227,18 @@ function! shellbridge#on_message(id, msg)
   endif
 endfunction
 
+" get current line of nearest command
+function! shellbridge#get_nearest_command()
+  let l = line('.')
+  if !shellbridge#is_command(l)
+    let l = search("%\\d*.|", "bn")
+  endif
+  return l
+endfunction
+
 " prompt user and filter output by input
 function! shellbridge#filter()
-  let l = line('.')
+  let l = shellbridge#get_nearest_command()
   let [s, e] = [l + 1, shellbridge#get_last_line(l)]
   if s <= e
     let key = Prompt("Filter Key: ", "")
