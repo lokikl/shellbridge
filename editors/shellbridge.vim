@@ -223,8 +223,8 @@ function! shellbridge#on_message(id, msg)
     let output = spad . substitute(output, "\n", "\n".spad, "g")
     exec "silent " . lastLine . "put =output"
     exec "silent normal! " . oline . "G" . ocol . "|"
-    exec "nohlsearch | redraw"
   endif
+  exec "nohlsearch | redraw"
 endfunction
 
 " get current line of nearest command
